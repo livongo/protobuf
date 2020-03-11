@@ -1,0 +1,35 @@
+#!/bin/bash -x
+
+parent=$(cd ..; pwd)
+#echo $parent
+workdir=/var/tmp/protobuf
+
+#docker run --rm --name protoc -v $parent:/protobuf.ro:ro protobuf-builder /bin/bash -x -c " \
+#       cp -pr /protobuf.ro $workdir; \
+#       cd $workdir; \
+#       ./configure; \
+#       make clean; \
+#       make; \
+#       make install"
+
+#docker run --rm --name protoc -v $parent:/protobuf.ro:ro protobuf-builder /bin/bash -x -c " \
+#       cp -pr /protobuf.ro $workdir; \
+#       cd $workdir; \
+#       ./configure; \
+#       make clean distclean; \
+#       make; \
+#       cd $workdir/protoc-artifacts; \
+#       ./build-protoc.sh linux x86_64 protoc"
+
+docker run --rm --name protoc -v $parent:/protobuf.ro:ro -v $parent:/protobuf.rw protobuf-builder /bin/bash -x -c " \
+       cp -pr /protobuf.ro $workdir; \
+       cd $workdir; \
+       git submodule update --init --recursive; \
+       ./autogen.sh; \
+       cd $workdir/protoc-artifacts; \
+       ./build-protoc.sh linux x86_64 protoc; \
+       cd $workdir; \
+       cp -pr protoc-artifacts/target /protobuf.rw/protoc-artifacts"
+
+echo "generated protoc.exe:"
+find ../protoc-artifacts -name 'protoc.exe'
